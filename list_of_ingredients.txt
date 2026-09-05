@@ -1,0 +1,6 @@
+ableton
+touchOSC
+max4live
+
+sugarbytes drumcomputer
+oeksound eq 3

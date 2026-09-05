@@ -1,0 +1,206 @@
+
+
+
+
+
+
+	drum control from maschine (midi input) -> project name: makrobiom_drums
+	
+	midi record channels 1 2 4 8 16 -> summed to a destination midi channels
+		need to record with session record (midi overdub)
+		for a selected channel (that switch on, rest switch off recording)
+			MAX4LIVE DEVICE NEEDED
+		everything else that would be recording, switched off -> **
+		
+	midi goes straight into drumcomputer -> no generated drum -> reason removed
+	
+	from drumcomputer, separate audio channels exist -> separate mixing, effects, etc
+	
+	to save state, I just need to record all drum separate channels to their track that theyre already playing, e.g. 16 ticks
+		this way it preserves, also can be further effected, played back
+		when state is saved, midi channel data needs to be cleared (no need)
+			MAX4LIVE DEVICE NEEDED
+		maybe separate drum engine and saved drum audio channels -> can be faded -> also effects on their summed group
+		
+		
+	separate amenbreak module later -> this is enough for now
+		
+		
+	** THERE CAN ALWAYS BE ONLY 1 RECORDING MIDI CHANNEL ACTIVE
+	*** IN CASE OF DRUM AUDIO, ITS AN EXCEPTION -> ALL DRUM AUDIO CHANNELS RECORD TOGETHER -> 1 GROUP
+	
+	max4live devices:
+		makrobiom_savestate_reset -> starts recording of the 5 clips into new row
+			auto-starts at section start
+			auto-ends at 16 -> auto plays at end -> store plays
+			
+			finds the DRUMCTRL midi channels and clears them -> live engine is mute
+			
+		autoswitchoff_param_at_2_bar -> switches an effect on, auto disables when global 2 bar ends
+		
+		makrobiom_midiselect -> has 5 buttons. mapped to 5 of the records. if 1 is pressed, that is switched on, rest of the 5 off
+		
+		undo and redo-> presses ctrl+z
+			on CHANNEL 9 CC 10 and CHANNEL 9 CC 11
+			
+		taptempo channel 9 cc 12	
+			
+			
+			
+			
+	MIDI ROUTING:
+	
+		channel 2: drum controls
+		
+			length selector CC
+				0, 1, 2, 3, 4
+				
+			session record CC
+				5
+				
+			snapshot, 
+				6, 
+				
+			short long enable CC
+				7 8 
+				
+			subs snrs hats perc enabled CC
+				9 10 11 12
+				
+			subs decay mod reso
+				86 88 13
+			
+			snrs hats perc decays -> snare decay skipped
+				90 94 98 
+				
+			perc vol 1 2 3
+				14 15 16 
+				
+			snrs vol 1 2 3
+				17 18 19
+				
+			hats perc mods 
+				96 100
+				
+			subs separate aftersub volume
+				20
+				
+			( recorded subs snares hats perc enabled CC
+				21 22 23 24 ) -> UNUSED
+				
+			snrs, hats, perc - delay, reverb
+				25, 26
+				27, 28
+				29, 30
+				
+			clear 1 2 4 8 16 all 
+				31 32 33 34 35 36
+			
+			live playing again
+				37
+				
+			snars hats perc - valhalla reverb
+				38 39 40
+				
+			midi echo, beatrepeat
+				41, 42
+				
+			drums set global length
+			
+				43
+				
+			drums lopass hipass filter xy
+			
+				44 45
+				
+			drums master NA
+			
+				46 47
+				
+			swing amount
+			
+				48
+				
+				
+				
+				
+				
+				
+				
+				
+		
+		
+		channel 9: utils
+			
+			start, stop CC
+				0, 1
+				
+			undo, redo CC
+				10, 11
+			
+			
+			
+		done rn
+		
+			rec play controls
+				keep final enable disables
+				delete separate
+				
+				
+				BIG remark: on live channel, mute midi instead of audio 
+				
+					drumcomputer tracks:
+						subs
+						snrs
+						hats
+						perc
+						snrs
+						hats
+						perc
+						perc
+						
+						from 36 to 51 by to, meaning
+						
+						subs: 36 37
+						snrs: 38 39 44 45
+						hats: 40 41 46 47
+						perc: 42 43 48 49 50 51
+						
+								var GROUPS = [
+									[[36, 37]],   // 1  subs
+									[[38, 39, 44, 45]],   // 2  snrs
+									[[40, 41, 46, 47]],   // 3  hats
+									[[42, 43, 48, 49, 50, 51]]    // 4  perc
+								];
+			route new "live plays too" input (touchOSC)
+			route new "clear patterns" inputs (touchOSC)
+			route new midi gates and track gates (touchOSC)
+			
+			drum engine patch selector (touchOSC)
+			
+			
+		still needed for the drum basics
+
+			
+
+			pattern audio fx -> lower, mangle, rand, fillin, shorten, someting (Ableton)
+				fix automations and or manual automations recorded
+				different tracks, select one on each (there is a default non pattern dummy)
+				
+			master bus fx (Ableton)
+			
+			
+			route pattern fx (touchOSC)
+			route bus fx (touchOSC)
+			
+			
+		extra version: sample engine
+			sample curate
+			separate on 4 instrument clusters
+			midi gates track gates 
+			touchOSC controls
+			
+			
+			
+			
+			

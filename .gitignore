@@ -1,0 +1,11 @@
+# Ableton-generated sample analysis — rebuilt automatically, pure noise in diffs
+*.asd
+
+# Windows shell cruft
+Desktop.ini
+Thumbs.db
+.DS_Store
+
+# Recorded audio — deliberately not in the repo (132 MB on the first pass).
+# Remove this rule if you ever need the samples versioned alongside the set.
+makrobiom_drums_v4 Project/Samples/
