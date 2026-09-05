@@ -12,7 +12,7 @@ handle recording, muting and clearing on musical boundaries.
 - **Ableton Live** — `makrobiom_drums_v4.als` (42 tracks)
 - **Max for Live** — 8 MIDI effects, 2 audio effects
 - **Sugar Bytes DrumComputer** — drum engine, `makrobiom_midicc.sbm` CC map + 20 preset banks
-- **oeksound EQ** — mixing
+- **Third-party plugins** — oeksound soothe3 (×5), Valhalla Supermassive
 
 ---
 
@@ -40,29 +40,58 @@ handle recording, muting and clearing on musical boundaries.
 UTILITY CH2                     4x M4L midi
 UTILITY CH9                     1x M4L midi
 DRMCTRL (group)
-  in DRMCTRL
+  in DRMCTRL                    -
   DRMCTRL 1 / 2 / 4 / 8 / 16    1x M4L midi each
   out DRMCTRL                   1x M4L midi
-DRMCOMP                         Sugar Bytes DrumComputer (VST)
+DRMCOMP                         VST: DrumComputer
 SMPLCTRL (group)
-  in SMPLCTRL
-  SMPLCTRL 1 / 2 / 4 / 8 / 16
+  in SMPLCTRL                   -
+  SMPLCTRL 1 / 2 / 4 / 8 / 16   -
   out SMPLCTRL                  1x M4L midi
-temp (audio) / temp (midi)
-DRMAUD (group)                  FX rack -> Limiter -> Beat Repeat -> M4L audio
-  subs aud                      FX rack
-    subs                          subs eng (Limiter), subs smpl (Limiter)
-    subs save                   M4L audio
-  snrs aud                      FX rack
-    snrs                          snrs eng, snrs smpl
-    snrs save                   M4L audio
-  hats aud                      FX rack, Compressor
-    hats                          hats eng, hats smpl
-    hats save                   M4L audio
-  perc aud                      FX rack, Compressor
-    perc                          perc eng, perc smpl
-    perc save                   M4L audio
+temp (audio) / temp (midi)      -
+DRMAUD (group)                  [master rack] -> Limiter -> Beat Repeat -> M4L autoswitchoff
+  subs aud                      [group rack]
+    subs
+      subs eng                  Limiter
+      subs smpl                 Limiter
+    subs save                   M4L track_gate
+  snrs aud                      [group rack]
+    snrs
+      snrs eng                  -
+      snrs smpl                 -
+    snrs save                   M4L track_gate
+  hats aud                      [group rack] -> Compressor
+    hats
+      hats eng                  -
+      hats smpl                 -
+    hats save                   M4L track_gate
+  perc aud                      [group rack] -> Compressor
+    perc
+      perc eng                  -
+      perc smpl                 -
+    perc save                   M4L track_gate
+Main                            Limiter
 ```
+
+### Rack contents
+
+**`[master rack]`** on DRMAUD — one chain:
+`OTT (Multiband Dynamics)` → `EQ Eight` → `Mastering - Gentle Limiter (Glue Compressor)` → `Saturator` → `soothe3` → `Auto Filter` → `Auto Filter`
+
+**`[group rack]`** on `subs aud` / `snrs aud` / `hats aud` / `perc aud` — identical in all four, one chain:
+`EQ Eight` → `Compressor` → `soothe3` → `Limiter`
+
+### Return tracks
+
+| | name | chain |
+|---|---|---|
+| A | long rev | EQ Eight → Compressor → Reverb → Compressor |
+| B | short rev | EQ Eight → Compressor → Reverb → Compressor |
+| C | 35 delay high | EQ Eight → Compressor → Delay → Compressor → Limiter |
+| D | 35 delay high | EQ Eight → Compressor → Delay → Delay → Stereo Gain → Compressor |
+| E | ValhallaSupermassive \| Compressor | Valhalla Supermassive → Compressor |
+
+The per-group delay / reverb / valhalla CCs (25–30, 39, 40) drive sends into these returns.
 
 ### Pattern
 
@@ -90,7 +119,7 @@ DRMAUD (group)                  FX rack -> Limiter -> Beat Repeat -> M4L audio
 | device | purpose | how |
 |---|---|---|
 | **track_gate** | switch a track's sound on the grid | `live.toggle` stores into `[int]` cold inlet; a `[delay @quantize]` one-shot releases it — off on the next beat, on at the next bar. 10 ms `[line~]` ramp, no click |
-| **autoswitchoff_param_at_2bar** | momentary Beat Repeat | press → `Repeat` on at the next 16th → off at the next 2-bar boundary of the song. Binds by name (DRMAUD / BeatRepeat / Repeat) via `autoswitchoff_target.js`, not by index |
+| **autoswitchoff_param_at_2bar** | momentary Beat Repeat (sits on DRMAUD) | press → `Repeat` on at the next 16th → off at the next 2-bar boundary of the song. Binds by name (DRMAUD / BeatRepeat / Repeat) via `autoswitchoff_target.js`, not by index |
 
 > All timing uses one-shot `[delay @quantize]` armed by the push, never a
 > free-running `[metro]` — a metro started at device load free-runs with a phase
@@ -113,7 +142,7 @@ DRMAUD (group)                  FX rack -> Limiter -> Beat Repeat -> M4L audio
 | CC | control | goes to |
 |---|---|---|
 | 0–4 | length select 1/4, 1/2, 1, 2, 4 | Live |
-| 5 | session record | M4L |
+| 5 | session record | Live (session record) |
 | 6 | snapshot store | Live |
 | 7, 8 | short / long enable | Live (no surface control) |
 | 9–12 | subs / snrs / hats / perc enable | Live → note_gate |
@@ -142,8 +171,8 @@ DRMAUD (group)                  FX rack -> Limiter -> Beat Repeat -> M4L audio
 | 12 | tap tempo |
 
 **Counts:** touchOSC sends 45 CCs on ch2; the Live set holds 32 CC mappings.
-The 15 that are not Live mappings go to DrumComputer or are read inside a M4L
-device. CC 7 and 8 are mapped in Live but have no surface control yet.
+The 14 that are not Live mappings go to DrumComputer or are read inside a M4L
+device (CC 43 → LoopCeiling). CC 7 and 8 are mapped in Live but have no surface control yet.
 
 > The channel field inside the `.tosc` is 0-based: `channel 1` = MIDI channel 2,
 > `channel 8` = MIDI channel 9.
