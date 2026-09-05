@@ -12,7 +12,8 @@ handle recording, muting and clearing on musical boundaries.
 - **Ableton Live** — `makrobiom_drums_v4.als` (42 tracks)
 - **Max for Live** — 8 MIDI effects, 2 audio effects
 - **Sugar Bytes DrumComputer** — drum engine, `makrobiom_midicc.sbm` CC map + 20 preset banks
-- **Third-party plugins** — oeksound soothe3 (×5), Valhalla Supermassive
+- **oeksound soothe3** — on every audio group rack and the master (×5)
+- **Valhalla Supermassive** — free plugin, long reverb on return E
 
 ---
 
@@ -89,15 +90,31 @@ Main                            Limiter
 | B | short rev | EQ Eight → Compressor → Reverb → Compressor |
 | C | 35 delay high | EQ Eight → Compressor → Delay → Compressor → Limiter |
 | D | 35 delay high | EQ Eight → Compressor → Delay → Delay → Stereo Gain → Compressor |
-| E | ValhallaSupermassive \| Compressor | Valhalla Supermassive → Compressor |
+| E | *(unnamed)* — long reverb | Valhalla Supermassive (free) → Compressor |
 
 The per-group delay / reverb / valhalla CCs (25–30, 39, 40) drive sends into these returns.
 
 ### Pattern
 
-- `DRMCTRL n` / `SMPLCTRL n` — one track per loop length, armed exclusively
-- `* eng` — live engine output; `* smpl` — sampler; `* save` — recorded take
-- `* aud` groups carry the per-group FX rack; `DRMAUD` is the master bus
+The set is three blocks:
+
+1. **Two MIDI chains** — `DRMCTRL` (drum engine) and `SMPLCTRL` (sampler), each
+   laid out as `in → 1 / 2 / 4 / 8 / 16 → out`. One length armed at a time,
+   both chains follow the same selection.
+2. **Utilities** — `UTILITY CH2` and `UTILITY CH9`, carrying the M4L devices that
+   are not tied to one track.
+3. **One audio group**, nested three deep:
+
+```
+DRMAUD                  master bus
+  └ <instr> aud         instrument group, carries the group FX rack
+      ├ <instr>         "live" group
+      │   ├ <instr> eng     live engine output
+      │   └ <instr> smpl    sampler output
+      └ <instr> save    recorded take, gated by track_gate
+```
+
+`<instr>` is one of subs / snrs / hats / perc.
 
 ---
 
