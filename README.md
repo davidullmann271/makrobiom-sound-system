@@ -44,12 +44,12 @@ DRMCTRL (group)
   in DRMCTRL                    -
   DRMCTRL 1 / 2 / 4 / 8 / 16    1x M4L midi each
   out DRMCTRL                   1x M4L midi
-DRMCOMP                         VST: DrumComputer
+DRMCOMP                         VST: DrumComputer  (the drum engine)
 SMPLCTRL (group)
   in SMPLCTRL                   -
   SMPLCTRL 1 / 2 / 4 / 8 / 16   -
   out SMPLCTRL                  1x M4L midi
-temp (audio) / temp (midi)      -
+temp (audio) / temp (midi)      reserved for the sample engine (not yet built)
 DRMAUD (group)                  [master rack] -> Limiter -> Beat Repeat -> M4L autoswitchoff
   subs aud                      [group rack]
     subs
@@ -115,6 +115,12 @@ DRMAUD                  master bus
 ```
 
 `<instr>` is one of subs / snrs / hats / perc.
+
+`DRMCOMP` sits outside all of this: it is the single track hosting the
+DrumComputer VST, fed by `out DRMCTRL`. The two `temp` tracks (one audio, one
+MIDI) are placeholders for the planned drum **sample** engine, which will be
+built to mirror the drum engine — its own MIDI chain and its own `smpl` legs
+under each instrument group.
 
 ---
 
