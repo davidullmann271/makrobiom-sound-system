@@ -4,6 +4,12 @@ Live-performance drum system: a touchOSC surface drives an Ableton Live set, a
 Sugar Bytes DrumComputer engine, and a set of custom Max for Live devices that
 handle recording, muting and clearing on musical boundaries.
 
+![The Ableton Live set](docs/ableton-set.png)
+*The Live set — DRMCTRL / SMPLCTRL MIDI chains, DRMAUD audio group, and the M4L devices.*
+
+![The touchOSC surface](docs/touchosc-surface.png)
+*The touchOSC control surface in the editor.*
+
 ---
 
 ## Components
