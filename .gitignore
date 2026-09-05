@@ -8,4 +8,6 @@ Thumbs.db
 
 # Recorded audio — deliberately not in the repo (132 MB on the first pass).
 # Remove this rule if you ever need the samples versioned alongside the set.
+# Exception: the dummy-clip sample is force-added and therefore tracked. If you
+# ever delete and re-add it, use `git add -f` or it will be ignored again.
 makrobiom_drums_v4 Project/Samples/
