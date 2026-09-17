@@ -119,8 +119,7 @@
 				play -> nothing is written
 			loopers start a few ms late (live api delay):
 				timing stays on grid, only the loop seam moves
-				TEST: downbeat in the rounds after the first clean? also when bar 2 was silent
-				TEST: looper goes on right after recording, no jump to the bar
+			transfers, layering and replace all tested 2026-09-17 - working
 			the feedback switch above is stale: 8 bar needs 0, the short ones need 100
 			transport stop clears nothing
 				looper_clear_all button empties all loopers
