@@ -1,8 +1,13 @@
 # makrobiom sound system
 
-Live-performance drum system: a touchOSC surface drives an Ableton Live set, a
-Sugar Bytes DrumComputer engine, and a set of custom Max for Live devices that
-handle recording, muting and clearing on musical boundaries.
+Live-performance system, played without a mouse: a touchOSC surface drives an
+Ableton Live set, a Sugar Bytes DrumComputer engine, and a set of custom Max for
+Live devices that handle recording, muting and clearing on musical boundaries.
+
+Two parts: the **drum system**, and the **looper module** — a chain of Ableton
+Loopers that layers, transfers short phrases into a long loop, replaces parts of
+it, and resamples itself through an effect chain. The looper module lives in its
+own set (bass first; the melody module will be the same layout).
 
 ![The Ableton Live set](docs/ableton-set.png)
 *The Live set — DRMCTRL / SMPLCTRL MIDI chains, DRMAUD audio group, and the M4L devices.*
@@ -15,8 +20,9 @@ handle recording, muting and clearing on musical boundaries.
 ## Components
 
 - **touchOSC** — control surface, `makrobiom_v4.tosc` + 5 Lua scripts
-- **Ableton Live** — `makrobiom_drums_v4.als` (42 tracks)
-- **Max for Live** — 8 MIDI effects, 2 audio effects
+- **Ableton Live** — `makrobiom_drums_v4.als` (42 tracks), `makrobiom_bass_looper_concept.als` (looper module)
+- **Ableton Looper** — 4 per looper module side, driven from MIDI clips
+- **Max for Live** — 8 MIDI effects, 3 audio effects
 - **Sugar Bytes DrumComputer** — drum engine, `makrobiom_midicc.sbm` CC map + 20 preset banks
 - **oeksound soothe3** — on every audio group rack and the master (×5)
 - **Valhalla Supermassive** — free plugin, long reverb on return E
@@ -36,6 +42,17 @@ handle recording, muting and clearing on musical boundaries.
 - Per-group delay / reverb / Valhalla sends, master filter XY
 - Undo / redo / tap tempo from the surface
 - Swing via Live's Groove Pool (global Groove Amount, switched not swept)
+
+Looper module:
+
+- Record an 8-bar loop, then layer into it for as long as you hold overdub
+- Record a 1, 2 or 4-bar phrase and transfer it into the 8-bar loop, repeated
+  to fill it — play over the last round to vary only that round
+- Replace a stretch of the loop instead of layering, by holding one button
+- Resample the loop through an effect chain: what the effects do is baked in on
+  every overdub pass, and heard before it is
+- Empty every Looper in the set from one button
+- Everything is triggered by MIDI clips or mapped buttons — no mouse
 
 ---
 
@@ -130,6 +147,85 @@ under each instrument group.
 
 ---
 
+## Looper module
+
+`makrobiom_bass_looper_concept.als`. One side = 7 tracks + the source. The bass
+module has an A and a B side; the melody module will use the same layout with
+its own names. Concept doc: `biome_bass_concept.txt`.
+
+### Track tree (A side)
+
+```
+SRC                             the instrument, routed into the chain
+BASS CTRL A (midi)              M4L looper_bridge  (controller clips)
+BASS LOOP A 1                   Looper, 1 bar      short
+BASS LOOP A 2                   Looper, 2 bars     short
+BASS LOOP A 4                   Looper, 4 bars     short
+BASS RET A                      M4L looper_replace (the loop coming back)
+BASS SHAPE A                    effect chain, limiter last
+BASS LOOP A 8                   Looper, 8 bars     the main loop
+```
+
+### Routing
+
+| track | Audio From | Monitor | Audio To |
+|---|---|---|---|
+| `BASS LOOP A 1` | `SRC` / Post FX | In | Sends Only |
+| `BASS LOOP A 2` | `BASS LOOP A 1` / Post FX | In | Sends Only |
+| `BASS LOOP A 4` | `BASS LOOP A 2` / Post FX | In | `BASS SHAPE A` |
+| `BASS RET A` | `BASS LOOP A 8` / `Insert-Looper` | In | Sends Only |
+| `BASS SHAPE A` | `BASS RET A` / Post FX | In | `BASS LOOP A` (the module out, → Main) |
+| `BASS LOOP A 8` | `BASS SHAPE A` / Post FX | In | Sends Only |
+
+Every Looper: Input → Output **Always**, Quantization **None**, Song Control
+**None**, Tempo Control **Follow song tempo**. Short Loopers: Record Length 1 /
+2 / 4 bars, Overdub after recording, Feedback **100%**. The 8-bar Looper:
+Record Length 8 bars, Play after recording, Feedback **0%**.
+
+### Pattern
+
+The main Looper's own Feedback is off. Its loop survives an overdub pass because
+it leaves through the `Insert-Looper` tap, passes `BASS RET A` and `BASS SHAPE A`,
+and arrives back at its **track input** — external feedback in place of the
+internal kind. That is what makes the three modes possible, and all three are
+switched by audio, not by Looper settings:
+
+| mode | Looper | `BASS RET A` | result |
+|---|---|---|---|
+| play | Play | open | nothing is written |
+| layer | Overdub | open | loop + what you play |
+| replace | Overdub | **muted** | only what you play, for as long as it is held |
+
+`BASS SHAPE A` is the only track you hear: the chain (live playing plus the short
+loops) and the returning loop, with the effects. Because it sits inside the loop,
+its effects are re-applied on every overdub pass — the iterative resampling of the
+melody sessions — so it needs a limiter last and unity gain.
+
+A **transfer** fills the long loop from a short one: the short Looper records its
+1, 2 or 4 bars and then repeats, overdubbing, until bar 9, while the 8-bar Looper
+overdubs the whole time. Play along in the last round and only that round differs.
+The short Looper is stopped and cleared at bar 9.
+
+### Controller clips
+
+One clip per action on `BASS CTRL A`, all triggered on the bar; the Loopers
+themselves are unquantized, so the clips do the timing.
+
+| clip | notes | length |
+|---|---|---|
+| record first | C0 (24) | short, **loop off** — one note, at 1 |
+| overdub 8 bar | C1 (36) | 8 bars, 1 → 9 |
+| overdub 1 bar | C3 (60) + C1 | 8 bars, both 1 → 9 |
+| overdub 2 bar | C#3 (61) + C1 | 8 bars, both 1 → 9 |
+| overdub 4 bar | D3 (62) + C1 | 8 bars, both 1 → 9 |
+
+The record note sits **on** the bar, not before it: an unquantized Looper starts
+when the note plays. A fixed-length recording replays what it heard exactly one
+loop length later, so on-grid playing stays on grid and only the loop's seam
+moves.
+
+---
+
 ## Max for Live devices
 
 ### MIDI effects
@@ -208,6 +304,20 @@ device (CC 43 → LoopCeiling). CC 7 and 8 are mapped in Live but have no surfac
 
 > The channel field inside the `.tosc` is 0-based: `channel 1` = MIDI channel 2,
 > `channel 8` = MIDI channel 9.
+
+### Looper module notes (from clips on the control track)
+
+| note | | drives |
+|---|---|---|
+| C0 | 24 | 8-bar Looper `record` |
+| C1 | 36 | 8-bar Looper `overdub` (note-off → `play`) |
+| C3 | 60 | 1-bar Looper `record` (note-off → `stop` + `clear`) |
+| C#3 | 61 | 2-bar Looper `record` |
+| D3 | 62 | 4-bar Looper `record` |
+
+Live's note names: middle C (60) is C3. The replace toggle and the clear-all
+button are MIDI-mapped instead, not clip-driven; one control can drive several
+parameters, so one button clears every module.
 
 ### Note map (DrumComputer, notes 36–51)
 
