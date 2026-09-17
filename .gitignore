@@ -11,3 +11,16 @@ Thumbs.db
 # Exception: the dummy-clip sample is force-added and therefore tracked. If you
 # ever delete and re-add it, use `git add -f` or it will be ignored again.
 makrobiom_drums_v4 Project/Samples/
+
+# Concept projects: same rule as the drums set — recorded audio stays local,
+# and so do Live's own backup sets (they are automatic snapshots, not history).
+makrobiom_bass_looper_concept Project/Samples/
+makrobiom_melodic_looper_concept Project/Samples/
+makrobiom_source_concepts Project/Samples/
+makrobiom_bass_looper_concept Project/Backup/
+makrobiom_melodic_looper_concept Project/Backup/
+makrobiom_source_concepts Project/Backup/
+makrobiom_drums_v4 Project/Backup/
+
+# Session recording, kept local
+iterative_resampler_v3_demo.wav

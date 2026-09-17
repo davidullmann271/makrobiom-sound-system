@@ -142,6 +142,8 @@ under each instrument group.
 | **drums_save_and_reset** | record a take, then reset | records the clips, launches the base dummy clips at the closing bar line, clears both engines after the take |
 | **LoopCeiling** | cap all loop lengths at once | track name encodes natural length; sets `loop_end = loop_start + min(natural, L)`. Stateless. Hardcoded to CC 43 |
 | **midi_undo_redo** | undo / redo from the surface | sends Ctrl+Z / Ctrl+Shift+Z |
+| **looper_bridge** | a MIDI clip drives the four Loopers of one module side | C0 (24) → 8-bar `record`, C1 (36) note-on/off → 8-bar `overdub`/`play`; C3 (60) / C#3 (61) / D3 (62) → `record` on the 1-, 2- and 4-bar Looper, note-off → `stop`, `clear` 100 ms later. C1 note-off stops a still-held short Looper before the 8-bar goes to `play`. Transport stop does nothing. Four name fields, empty = unused. Loopers unquantized, clips do the timing. Replaces `looper_overdub_bridge` and `bass_looper_bridge` (now in `deprecated/`). See `looper_bridge_README.txt` |
+| **looper_clear_all** | empty every Looper from one button | MIDI-mappable `live.text` button → `stop` on each Looper named in its eight fields, `clear` 100 ms later |
 
 ### Audio effects
 
@@ -149,6 +151,7 @@ under each instrument group.
 |---|---|---|
 | **track_gate** | switch a track's sound on the grid | `live.toggle` stores into `[int]` cold inlet; a `[delay @quantize]` one-shot releases it — off on the next beat, on at the next bar. 10 ms `[line~]` ramp, no click |
 | **autoswitchoff_param_at_2bar** | momentary Beat Repeat (sits on DRMAUD) | press → `Repeat` on at the next 16th → off at the next 2-bar boundary of the song. Binds by name (DRMAUD / BeatRepeat / Repeat) via `autoswitchoff_target.js`, not by index |
+| **looper_replace** | overdub a Looper that replaces instead of adds (sits on the loop's return track) | MIDI-mappable toggle: on → `overdub` + the device's own audio (the return) fades out in 30 ms; off → fades back in, then `play`. Needs the Feedback-0 return-through-track-input routing. One name field. See `looper_replace_README.txt` |
 
 > All timing uses one-shot `[delay @quantize]` armed by the push, never a
 > free-running `[metro]` — a metro started at device load free-runs with a phase

@@ -1,0 +1,61 @@
+biome_melodic_concept
+
+
+	on source:
+		beat freeze device m4l - CHANNEL 4
+			hold freeze - CC1
+			freeze time settings - CC2
+		
+		
+		
+	4 tracks - for 2 modules - 8 total
+		SRC -> route source here
+		LOOP CTRL -> controller midi clips
+			record first -> START THIS AT BEGINNING
+				length short
+				LOOP OFF (a looping clip re-records every pass)
+				midi note C0
+				short note at 1
+				
+			overdub 4 bars -> START THIS WHEN RECORDING OVER IT
+				length 4+
+				midi note C1
+				start at 1, end at 5
+				
+			max4live device - looper_bridge -> FILL 4 BAR LOOPER NAME, LEAVE 1 AND 2 BAR EMPTY
+				
+		LOOP -> main looper module, put limiter after it
+			audio from SHAPE post fx
+			audio to nothing
+			monitor in
+			feedback 0%
+			input to output always
+			record 4 bars
+			quantize none - only the clips are quantized
+			record then play
+			
+		SHAPE -> main fx iterative resample track
+			effect chain on it (melody_looper_fx_rack)
+			put limiter after it
+			
+			audio from LOOP Insert-Looper
+			audio to main
+			monitor in
+			
+			
+		
+			
+	controls - CHANNEL 6 - CHANNEL 7:
+		start record at beginning - no control
+		record 4 bars - cc 1
+		simple overdub - cc 2
+		reset effects - 
+		record into clip - 
+		
+	remarks:
+		if length needed to change:
+			change clip lengths
+			change looper length
+			
+			
+		

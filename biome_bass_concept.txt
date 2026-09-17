@@ -1,0 +1,130 @@
+
+
+
+
+
+	bass module - CHANNEL 5
+		2 sides, A and B
+			4 lengths - 1bar, 2bar, 4bar, 8bar
+			8 bar is the main one, the short ones transfer into it
+			only BASS SHAPE A is heard
+			
+			
+		chain (A side):
+			source -> BASS LOOP 1 A -> BASS LOOP 2 A -> BASS LOOP 4 A -> BASS SHAPE A -> bass fx
+			BASS LOOP 8 A records BASS SHAPE A and returns through BASS RET A into BASS SHAPE A
+		
+		B side same, with B names:
+			BASS CTRL B, BASS LOOP 1 B, BASS LOOP 2 B, BASS LOOP 4 B, BASS LOOP 8 B,
+			BASS RET B, BASS SHAPE B
+		
+		
+		BASS CTRL A -> controller midi clips
+			record first -> START THIS AT BEGINNING
+				length short
+				LOOP OFF (a looping clip re-records every pass)
+				midi note C0
+				short note at 1
+				
+			overdub 8 bar -> START THIS WHEN RECORDING OVER IT
+				length 8+
+				midi note C1
+				start at 1, end at 9
+				
+			overdub 1 bar -> START THIS TO ADD A 1 BAR PHRASE
+				length 8+
+				midi note C3 - start at 1, end EXACTLY at 9
+				midi note C1 - start at 1, end at 9 or a bit after (catches the tail)
+				
+			overdub 2 bar -> same, but midi note C#3
+			overdub 4 bar -> same, but midi note D3
+				
+			max4live device - looper_bridge -> FILL ALL 4 LOOPER NAMES
+				
+		BASS LOOP 1 A -> 1 bar looper
+			audio from source track
+			audio to sends only
+			monitor in
+			record 1 bar
+			record then overdub
+			feedback 100%
+			
+		BASS LOOP 2 A -> 2 bar looper
+			audio from BASS LOOP 1 A post fx
+			audio to sends only
+			monitor in
+			record 2 bars
+			record then overdub
+			feedback 100%
+			
+		BASS LOOP 4 A -> 4 bar looper
+			audio from BASS LOOP 2 A post fx
+			audio to BASS SHAPE A
+			monitor in
+			record 4 bars
+			record then overdub
+			feedback 100%
+			
+		BASS RET A -> the 8 bar loop coming back, this is what replace mutes
+			audio from BASS LOOP 8 A Insert-Looper
+			audio to sends only
+			monitor in
+			max4live device - looper_replace -> FILL 8 BAR LOOPER NAME, MIDI MAP THE TOGGLE
+			fader 0 db, pan center (it sits inside the loop)
+			
+		BASS SHAPE A -> fx track, and the input of the 8 bar looper
+			audio from BASS RET A post fx
+			audio to bass fx
+			monitor in
+			effect chain on it, limiter last (this is a real feedback loop)
+			effects get baked in on every overdub pass, and are heard before that
+			
+		BASS LOOP 8 A -> main bass looper
+			audio from BASS SHAPE A post fx
+			audio to sends only
+			monitor in
+			record 8 bars
+			record then play
+			feedback 0% (the loop comes back through BASS RET A instead)
+		
+		for all loopers:
+			quantize none - only the clips are quantized
+			input to output always
+			song control none
+			follow song tempo
+		
+		on source:
+			beat freeze device m4l - CHANNEL 4
+				hold freeze - CC1
+				freeze time settings - CC2
+		
+		controls:
+			feedback 0 or 100 switch FOR ALL - maybe with fade - m4l device needed (1)
+			A side B side switch - m4l device needed (2)
+			length selector 1-2-4 - m4l device needed (2)
+			simple overdub, quantized overdub (2)
+			replace toggle - looper_replace on BASS RET A - MIDI mappable
+			clear all loopers - looper_clear_all button - MIDI mappable
+		
+		remarks:
+			transfer:
+				short looper records, then overdubs until 9
+				phrase end after the bar -> gets on the loop start
+				playing in the middle rounds gets layered into the short loop too
+				8 bar overdubs all of it, short looper gets cleared
+				play along in the last round -> only that round gets it
+			replace:
+				overdub + BASS RET A muted -> only what i play is written
+				overdub + BASS RET A open -> layering
+				play -> nothing is written
+			loopers start a few ms late (live api delay):
+				timing stays on grid, only the loop seam moves
+				TEST: downbeat in the rounds after the first clean? also when bar 2 was silent
+				TEST: looper goes on right after recording, no jump to the bar
+			the feedback switch above is stale: 8 bar needs 0, the short ones need 100
+			transport stop clears nothing
+				looper_clear_all button empties all loopers
+			if length needed to change:
+				change clip lengths
+				change looper length
+			
