@@ -201,12 +201,9 @@ Verified in Live with looper_overdub_bridge (2026-09-10): C1 overdub start
 and the Play at its note-off both land on the bar.
 
 
-TO TEST IN LIVE
----------------
-- A transfer: the 8-bar loop keeps its old content and gains the
-  transferred phrase; no doubled attack at its loop start.
-- The downbeat in the rounds after the first sounds clean, also when bar 2
-  of the recording pass was silent.
-- The short Looper is empty after its note-off. If not, raise CLEAR_DELAY.
-- A phrase ringing past the bar: its tail is on the short loop's start from
-  round 2 on.
+VERIFIED IN LIVE (2026-09-17)
+-----------------------------
+- The transfers work: C3 / C#3 / D3 into the 8-bar Looper, which keeps its
+  old content and gains the transferred phrase. The short Looper is cleared
+  after its note-off.
+- Overdub layering and looper_replace both work in this routing.
