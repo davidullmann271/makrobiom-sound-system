@@ -1,0 +1,6 @@
+source module CH4
+
+
+
+	beat freeze cc1 cc2
+	source monitor exclusive cc3 cc4 cc5 cc6 cc7

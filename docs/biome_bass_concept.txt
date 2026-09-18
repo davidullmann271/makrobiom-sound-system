@@ -127,3 +127,18 @@
 				change clip lengths
 				change looper length
 			
+			
+			
+			
+			
+			
+			
+	touchOSC scheme
+		rec 1bar cc0
+		rec 2bar cc1
+		rec 4bar cc2
+		rec 8bar cc3
+		
+		layer	cc4
+		replace cc5
+		

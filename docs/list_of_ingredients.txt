@@ -1,0 +1,19 @@
+ableton
+touchOSC
+max4live
+
+sugarbytes drumcomputer
+oeksound eq 3
+
+
+
+
+
+
+CHANNELS
+	drums engine - ch2
+	drum samples - ch3
+	source setgs - ch4
+	bass loopers - ch5 ch6
+	melody loops - ch6 ch7
+	

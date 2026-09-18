@@ -9,10 +9,10 @@ Loopers that layers, transfers short phrases into a long loop, replaces parts of
 it, and resamples itself through an effect chain. The looper module lives in its
 own set (bass first; the melody module will be the same layout).
 
-![The Ableton Live set](docs/ableton-set.png)
+![The Ableton Live set](ableton-set.png)
 *The Live set — DRMCTRL / SMPLCTRL MIDI chains, DRMAUD audio group, and the M4L devices.*
 
-![The touchOSC surface](docs/touchosc-surface.png)
+![The touchOSC surface](touchosc-surface.png)
 *The touchOSC control surface in the editor.*
 
 ---
